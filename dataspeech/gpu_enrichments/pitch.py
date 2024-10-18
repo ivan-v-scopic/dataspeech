@@ -24,6 +24,8 @@ def pitch_apply(batch, rank=None, audio_column_name="audio", output_column_name=
     if isinstance(batch[audio_column_name], list):  
         utterance_pitch_mean = []
         utterance_pitch_std = []
+        utterance_pitch_min = []
+        utterance_pitch_max = []
         for sample in batch[audio_column_name]:
             # Infer pitch and periodicity
             pitch, periodicity = penn.from_audio(
@@ -41,9 +43,13 @@ def pitch_apply(batch, rank=None, audio_column_name="audio", output_column_name=
             
             utterance_pitch_mean.append(pitch.mean().cpu())
             utterance_pitch_std.append(pitch.std().cpu())
+            utterance_pitch_min.append(pitch.min().cpu())
+            utterance_pitch_max.append(pitch.max().cpu())
             
         batch[f"{output_column_name}_mean"] = utterance_pitch_mean 
         batch[f"{output_column_name}_std"] = utterance_pitch_std 
+        batch[f"{output_column_name}_min"] = utterance_pitch_min
+        batch[f"{output_column_name}_max"] = utterance_pitch_max
     else:
         sample = batch[audio_column_name]
         pitch, periodicity = penn.from_audio(
@@ -60,5 +66,7 @@ def pitch_apply(batch, rank=None, audio_column_name="audio", output_column_name=
                 )        
         batch[f"{output_column_name}_mean"] = pitch.mean().cpu()
         batch[f"{output_column_name}_std"] = pitch.std().cpu()
+        batch[f"{output_column_name}_min"] = pitch.min().cpu()
+        batch[f"{output_column_name}_max"] = pitch.max().cpu()
 
     return batch
